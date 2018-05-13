@@ -30,7 +30,7 @@ def write_zufan_info(start_url,maxPage,location="doumen",types="chuzu",minPrice=
     try:
         client = MongoClient('localhost',27017)
         db_58zufangcity = client.db_58zufangcity
-        domen_base_info = db_58zufangcity[location+"_base_info"]
+        table = db_58zufangcity[location+"_base_info"]
         for page in structure_url_list:
             try:
                 response = requests.get(page, headers=headers)
@@ -50,7 +50,7 @@ def write_zufan_info(start_url,maxPage,location="doumen",types="chuzu",minPrice=
                     "href": href,
                     "text": text.split()
                 }
-                domen_base_info.insert(data)
+                table.insert(data)
             print("Download:{0}".format(response.url))
             time.sleep(4)
     except Exception as e:
@@ -59,4 +59,32 @@ def write_zufan_info(start_url,maxPage,location="doumen",types="chuzu",minPrice=
     finally:
         if client is not None:
             client.close()
-write_zufan_info(url,location='jida',maxPage=get_max_pages(url))
+#write_zufan_info(url,location='jida',maxPage=get_max_pages(url))
+
+def write_zufan_details_info(table_name):
+    client = None
+    try:
+        client = MongoClient('localhost', 27017)
+        db_58zufangcity = client.db_58zufangcity
+        table = db_58zufangcity[table_name]
+        table_data = table.find()
+
+
+    except Exception as e:
+        print('连接数据库失败')
+        print(e.args)
+    finally:
+        if client is not None:
+            client.close()
+
+
+#write_zufan_details_info("jida_base_info")
+
+response = requests.get("http://zh.58.com/hezu/34076317834418x.shtml",headers=headers)
+html = BeautifulSoup(response.text,'lxml')
+money = html.select("div.house-basic-info > div.house-basic-right.fr > div.house-basic-desc > div.house-desc-item.fl.c_333 > div > span.c_ff552e > b")
+types = html.select("div.house-desc-item.fl.c_333 > ul.f14 > li:nth-of-type(1) > span:nth-of-type(2)")
+room =  html.select("div.house-desc-item.fl.c_333 > ul.f14 > li:nth-of-type(2) > span:nth-of-type(2)")
+
+#body > div.main-wrap > div.house-basic-info > div.house-basic-right.fr > div.house-basic-desc > div.house-desc-item.fl.c_333 > ul > li:nth-child(1) > span:nth-child(2)
+print(room)
